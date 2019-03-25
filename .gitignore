@@ -349,3 +349,8 @@ healthchecksdb
 MigrationBackup/
 
 # End of https://www.gitignore.io/api/visualstudio
+
+
+### chromium ###
+## Ignore local installation of chromium
+**/.local-chromium/

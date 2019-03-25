@@ -10,4 +10,8 @@
     <NoWarn>1701;1702</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="PuppeteerSharp" Version="1.12.1" />
+  </ItemGroup>
+
 </Project>
