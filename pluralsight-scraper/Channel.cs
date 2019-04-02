@@ -13,12 +13,6 @@ namespace VH.PluralsightScraper
 
         public Exception ScrapException { get; }
 
-        public Channel(string url, Exception scrapException)
-            : this(url, scrapException, channelName: null, courses: null)
-        {
-            // empty
-        }
-
         public Channel(string url, string channelName, Exception scrapException)
             : this(url, scrapException, channelName, courses: null)
         {
