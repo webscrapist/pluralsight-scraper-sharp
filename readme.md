@@ -10,7 +10,6 @@ dotnet run -username santiago@vasquezhouse.com -password aburra75 -headless fals
 
 - have some todo markers in the code
 
-- delete test projects from folder
 
 ### Puppeteer-Sharp
 - https://github.com/kblok/puppeteer-sharp
