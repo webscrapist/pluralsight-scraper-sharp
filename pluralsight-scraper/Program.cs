@@ -1,34 +1,33 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using PuppeteerSharp;
 
 namespace VH.PluralsightScraper
 {
     internal class Program
     {
-        private static void Main()
+        private static void Main(string[] args)
         {
-            if (TakeScreenshot().Result)
+            try
             {
-                Console.WriteLine("all good");
+                string username = args.Username();
+                string password = args.Password();
+                bool headless = args.Headless();
+
+                Scraper scraper = CompositionRoot.CreateScraper(username, password, headless);
+            
+                Task<IEnumerable<Channel>> task = scraper.GetChannels();
+
+                ConsoleView.ShowGettingChannels();
+
+                task.Wait();
+                
+                ConsoleView.Show(task.Result);
             }
-        }
-
-        private static async Task<bool> TakeScreenshot()
-        {
-            await new BrowserFetcher().DownloadAsync(BrowserFetcher.DefaultRevision);
-
-            Browser browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
-
-            Page page = await browser.NewPageAsync();
-
-            await page.GoToAsync("http://www.google.com");
-
-            const string OUTPUT_FILE = @"C:\Users\Santiago\Desktop\delete\scraper-output\pic.jpg";
-
-            await page.ScreenshotAsync(OUTPUT_FILE);
-
-            return true;
+            catch (Exception e)
+            {
+                ConsoleView.Show(e);
+            }
         }
     }
 }
