@@ -1,4 +1,8 @@
-﻿using VH.PluralsightScraper.Data;
+﻿using System.IO;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using VH.PluralsightScraper.Authentication;
+using VH.PluralsightScraper.Data;
 
 namespace VH.PluralsightScraper
 {
@@ -12,8 +16,27 @@ namespace VH.PluralsightScraper
 
         public static ChannelsReplicator CreateChannelsReplicator()
         {
-            // santi: [next] implement
-            throw new System.NotImplementedException();
+            string connectionString = GetConnectionString();
+            
+            DbContextOptions<PluralsightContext> options = 
+                new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(connectionString).Options;
+
+            var session = new WindowsSession();
+
+            var pluralsightContext = new PluralsightContext(options, session);
+
+            return new ChannelsReplicator(pluralsightContext);
+        }
+
+        private static string GetConnectionString()
+        {
+            IConfigurationBuilder configBuilder = 
+                new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+                                          .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false);
+
+            IConfigurationRoot configRoot = configBuilder.Build();
+
+            return configRoot.GetConnectionString("PluralsightData");
         }
     }
 }
