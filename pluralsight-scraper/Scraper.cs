@@ -1,7 +1,9 @@
 ﻿using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper
 {
@@ -14,9 +16,9 @@ namespace VH.PluralsightScraper
             _password = password ?? throw new ArgumentNullException(nameof(password));
         }
 
-        public async Task<IEnumerable<Channel>> GetChannels()
+        public async Task<IEnumerable<ChannelDto>> GetChannels(CancellationToken cancellationToken)
         {
-            var channelsList = new List<Channel>();
+            var channelsList = new List<ChannelDto>();
 
             using (Browser browser = await _browserFactory.Create())
             using (Page page = await browser.NewPageAsync())
@@ -25,10 +27,10 @@ namespace VH.PluralsightScraper
                 
                 IEnumerable<string> channelUrls =  await GetChannelUrls(page);
 
-                // santi: [to-do-next] consider doing this in parallel
+                // santi: [next] consider doing this in parallel
                 foreach (string url in channelUrls)
                 {
-                    Channel channel = await GetChannelDetails(page, url);
+                    ChannelDto channel = await GetChannelDetails(page, url);
                     channelsList.Add(channel);
                 }
             }
@@ -43,19 +45,19 @@ namespace VH.PluralsightScraper
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
             //await page.WaitForSelectorAsync(TITLE_SELECTOR);
 
-            // santi: [to-do-next] refactor using page.QuerySelectorAllAsync()
+            // santi: [next] refactor using page.QuerySelectorAllAsync()
             string jsSelectChannelName = $@"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
 
             return await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
         }
 
-        private static async Task<IEnumerable<Course>> GetCourses(Page page)
+        private static async Task<IEnumerable<CourseDto>> GetCourses(Page page)
         {
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
             //const string COURSES_SELECTOR = "ul._1Ws76NZ6";
             //await page.WaitForSelectorAsync(COURSES_SELECTOR);
 
-            // santi: [to-do-next] consider moving this to a js file
+            // santi: [next] consider moving this to a js file
             const string JS_FUNCTION_TO_GET_COURSES_DETAILS = @"() => {
   const selectors = Array.from(document.querySelectorAll('div.css-kxulf3 a'));
 
@@ -92,10 +94,10 @@ namespace VH.PluralsightScraper
   });
 }";
 
-            return await page.EvaluateFunctionAsync<Course[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
+            return await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
         }
 
-        private static async Task<Channel> GetChannelDetails(Page page, string url)
+        private static async Task<ChannelDto> GetChannelDetails(Page page, string url)
         {
             string channelName = null;
 
@@ -107,13 +109,13 @@ namespace VH.PluralsightScraper
 
                 channelName = await GetChannelName(page);
 
-                IEnumerable<Course> courses = await GetCourses(page);
+                IEnumerable<CourseDto> courses = await GetCourses(page);
 
-                return new Channel(url, channelName, courses);
+                return new ChannelDto(url, channelName, courses);
             }
             catch (Exception e)
             {
-                return new Channel(url, channelName, scrapException: e);
+                return new ChannelDto(url, channelName, scrapException: e);
             }
         }
 

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RootNamespace>VH.PluralsightScraper.Tests.Integration</RootNamespace>
+    <ApplicationIcon>cshtmlfile.11.ico</ApplicationIcon>
+  </PropertyGroup>
+
+</Project>
