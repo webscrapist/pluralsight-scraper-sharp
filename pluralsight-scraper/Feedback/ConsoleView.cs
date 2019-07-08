@@ -51,26 +51,30 @@ namespace VH.PluralsightScraper.Feedback
             }
             
             Console.WriteLine();
-            Console.WriteLine($"channels count: [{sortedChannels.Length}]");
-            Console.WriteLine($"       elapsed: [{_stopWatch.Elapsed}]");
+            Console.WriteLine($"channels count : [{sortedChannels.Length}]");
+            Console.WriteLine($"       elapsed : [{_stopWatch?.Elapsed}]");
         }
 
         public static void Show(ReplicateResult result)
         {
             var columnsConfig = new[]
                                 {
-                                    new TableColumn(name: "index"       , length:  5, alignment: "right"),
-                                    new TableColumn(name: "channel name", length: 30, alignment: "left" ),
-                                    new TableColumn(name: "action"      , length: 10, alignment: "left" ),
+                                    new TableColumn(TableRenderer.COLUMN_NAME_INDEX       , length:  5, alignment: "right", getValue: (detail, i) => i.ToString()),
+                                    new TableColumn(TableRenderer.COLUMN_NAME_CHANNEL_NAME, length: 30, alignment: "left" , getValue: (detail, i) => detail.ChannelName),
+                                    new TableColumn(TableRenderer.COLUMN_NAME_ACTION      , length: 10, alignment: "left" , getValue: (detail, i) => detail.Action.ToString()),
                                 };
 
             var tableRenderer = new TableRenderer(columnsConfig);
 
+            Console.WriteLine();
             Console.WriteLine(tableRenderer.Headers);
+
+            var rowIndex = 1;
 
             foreach (ReplicateResultDetail detail in result.Details)
             {
-                Console.WriteLine(tableRenderer.DataRow(detail));
+                Console.WriteLine(tableRenderer.DataRow(detail, rowIndex));
+                rowIndex += 1;
             }
 
             Console.WriteLine();
@@ -83,7 +87,7 @@ namespace VH.PluralsightScraper.Feedback
             Console.WriteLine($"     total channels : [{result.TotalChannelsCount}]");
 
             Console.WriteLine();
-            Console.WriteLine($"           elapsed : [{_stopWatch.Elapsed}]");
+            Console.WriteLine($"            elapsed : [{_stopWatch?.Elapsed}]");
         }
 
         public static void ShowCancelRequested()
