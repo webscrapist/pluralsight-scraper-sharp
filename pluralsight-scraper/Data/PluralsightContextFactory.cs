@@ -5,7 +5,7 @@ using VH.PluralsightScraper.Authentication;
 namespace VH.PluralsightScraper.Data
 {
     /// <summary>
-    /// used by migrations
+    /// used at design time by migrations
     /// </summary>
     internal class PluralsightContextFactory : IDesignTimeDbContextFactory<PluralsightContext>
     {
@@ -13,11 +13,9 @@ namespace VH.PluralsightScraper.Data
 
         public PluralsightContext CreateDbContext(string[] args)
         {
-            // santi: [next] implement
-            // read from config
-            const string CONNECTION_STRING = "host=hostname;port=5432;database=databaseName;user id=userName;password=secret";
+            const string FAKE_CONNECTION_STRING = "host=foo-host;port=5432;database=foo-database;user id=foo-user;password=foo-password";
 
-            DbContextOptions options = new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(CONNECTION_STRING).Options;
+            DbContextOptions options = new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(FAKE_CONNECTION_STRING).Options;
 
             var session = new WindowsSession();
             
