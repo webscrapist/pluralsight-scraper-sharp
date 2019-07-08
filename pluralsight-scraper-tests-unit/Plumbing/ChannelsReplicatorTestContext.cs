@@ -102,30 +102,29 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
 
         public async Task when_replicate()
         {
-            using (var dbContextFactory = new DbContextFactory())
+            var dbContextFactory = new DbContextFactory();
+            
+            await SeedDataInDatabase(dbContextFactory, new CancellationToken());
+
+            try
             {
-                await SeedDataInDatabase(dbContextFactory, new CancellationToken());
+                var cancellationToken = new CancellationToken(_isReplicationCanceled);
 
-                try
+                using (PluralsightContext dbContext = await dbContextFactory.Create(cancellationToken))
                 {
-                    var cancellationToken = new CancellationToken(_isReplicationCanceled);
-
-                    using (PluralsightContext dbContext = await dbContextFactory.Create(cancellationToken))
-                    {
-                        var sut = new ChannelsReplicator(dbContext);
-                        _result = await sut.Replicate(_channelsToReplicate, cancellationToken);
-                    }
+                    var sut = new ChannelsReplicator(dbContext);
+                    _result = await sut.Replicate(_channelsToReplicate, cancellationToken);
                 }
-                catch (Exception e)
+            }
+            catch (Exception e)
+            {
+                if (_expectingException)
                 {
-                    if (_expectingException)
-                    {
-                        _exception = e;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    _exception = e;
+                }
+                else
+                {
+                    throw;
                 }
             }
         }

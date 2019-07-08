@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +8,7 @@ using VH.PluralsightScraper.Data;
 
 namespace VH.PluralsightScraper.Tests.Unit.Plumbing
 {
-    internal class DbContextFactory : IDisposable
+    internal class DbContextFactory
     {
         public async Task<PluralsightContext> Create(CancellationToken cancellationToken)
         {
@@ -39,24 +38,7 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
                                                                     .EnableSensitiveDataLogging()
                                                                     .Options;
         }
-
-        #region IDisposable
-
-        // santi: [next] it seems IDisposable is not needed, cleanup
-        public void Dispose()
-        {
-            //if (_connection == null)
-            //{
-            //    return;
-            //}
-
-            //_connection.Dispose();
-            //_connection = null;
-        }
-
-        #endregion
-
+        
         private DbContextOptions _dbContextOptions;
-        //private DbConnection _connection;
     }
 }
