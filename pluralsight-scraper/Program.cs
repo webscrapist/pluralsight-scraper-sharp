@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Serilog;
 using VH.PluralsightScraper.Data;
 using VH.PluralsightScraper.Domain;
 using VH.PluralsightScraper.Dtos;
 using VH.PluralsightScraper.Feedback;
+using VH.PluralsightScraper.Logging;
 
 namespace VH.PluralsightScraper
 {
@@ -14,13 +18,15 @@ namespace VH.PluralsightScraper
     {
         public Program()
         {
-            _replicator = CompositionRoot.CreateChannelsReplicator();
+            _replicator = CompositionRoot.CreateChannelsReplicator(Configuration);
         }
 
         public static async Task Main(string[] args)
         {
             try
             {
+                SerilogManager.Init(Configuration);
+
                 string username = args.Username();
                 string password = args.Password();
                 bool headless = args.Headless();
@@ -39,7 +45,12 @@ namespace VH.PluralsightScraper
             }
             catch (Exception e)
             {
+                Log.Fatal(e, "app crashed");
                 ConsoleView.Show(e);
+            }
+            finally
+            {
+                SerilogManager.Close();
             }
         }
 
@@ -61,6 +72,11 @@ namespace VH.PluralsightScraper
             ReplicateResult result = await _replicator.Replicate(channels, _cancellation.Token);
             ConsoleView.Show(result);
         }
+
+        private static readonly IConfiguration Configuration = new ConfigurationBuilder()
+                                                               .SetBasePath(Directory.GetCurrentDirectory())
+                                                               .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false)
+                                                               .Build();
 
         private static CancellationTokenSource _cancellation;
         private static ChannelsReplicator _replicator;

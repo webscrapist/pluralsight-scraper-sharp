@@ -13,10 +13,17 @@
     <PackageReference Include="Moq" Version="4.10.1" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="2.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\pluralsight-scraper\pluralsight-scraper.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="AppSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

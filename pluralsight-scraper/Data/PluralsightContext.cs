@@ -9,10 +9,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using VH.PluralsightScraper.Authentication;
 using VH.PluralsightScraper.Domain;
 
-// santi: [next] look into EF Core Power Tools extension by erikej
-
-// santi: [next] add logging to capture EF generated sql, use Sentry for logging
-
 namespace VH.PluralsightScraper.Data
 {
     internal class PluralsightContext : DbContext

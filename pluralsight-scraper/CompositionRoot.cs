@@ -1,6 +1,7 @@
-﻿using System.IO;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using VH.PluralsightScraper.Authentication;
 using VH.PluralsightScraper.Data;
 
@@ -14,29 +15,23 @@ namespace VH.PluralsightScraper
             return new Scraper(browserFactory, username, password);
         }
 
-        public static ChannelsReplicator CreateChannelsReplicator()
+        public static ChannelsReplicator CreateChannelsReplicator(IConfiguration configuration)
         {
-            string connectionString = GetConnectionString();
-            
+            string postgreSqlConnString = configuration.GetConnectionString("PluralsightData");
+
+            ILoggerFactory serilogFactory = new LoggerFactory().AddSerilog();
+
             DbContextOptions<PluralsightContext> options = 
-                new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(connectionString).Options;
+                new DbContextOptionsBuilder<PluralsightContext>().EnableSensitiveDataLogging()
+                                                                 .UseNpgsql(postgreSqlConnString)
+                                                                 .UseLoggerFactory(serilogFactory)
+                                                                 .Options;
 
             var session = new WindowsSession();
 
             var pluralsightContext = new PluralsightContext(options, session);
 
             return new ChannelsReplicator(pluralsightContext);
-        }
-
-        private static string GetConnectionString()
-        {
-            IConfigurationBuilder configBuilder = 
-                new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                                          .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false);
-
-            IConfigurationRoot configRoot = configBuilder.Build();
-
-            return configRoot.GetConnectionString("PluralsightData");
         }
     }
 }

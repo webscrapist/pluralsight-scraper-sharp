@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
+using Serilog;
 using VH.PluralsightScraper.Authentication;
 using VH.PluralsightScraper.Data;
 
@@ -34,8 +36,11 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
             var connection = new SqliteConnection("DataSource=:memory:");
             await connection.OpenAsync(cancellationToken);
 
-            return new DbContextOptionsBuilder<PluralsightContext>().UseSqlite(connection)
-                                                                    .EnableSensitiveDataLogging()
+            ILoggerFactory serilogFactory = new LoggerFactory().AddSerilog();
+
+            return new DbContextOptionsBuilder<PluralsightContext>().EnableSensitiveDataLogging()
+                                                                    .UseSqlite(connection)
+                                                                    .UseLoggerFactory(serilogFactory)
                                                                     .Options;
         }
         

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using VH.PluralsightScraper.Data;
 using VH.PluralsightScraper.Domain;
 using VH.PluralsightScraper.Dtos;
+using VH.PluralsightScraper.Logging;
 
 namespace VH.PluralsightScraper.Tests.Unit.Plumbing
 {
@@ -238,6 +241,16 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
         public void should_throw_exception()
         {
             _exception.Should().NotBeNull();
+        }
+
+        static ChannelsReplicatorTestContext()
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                                           .SetBasePath(Directory.GetCurrentDirectory())
+                                           .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false)
+                                           .Build();
+
+            SerilogManager.Init(configuration);
         }
         
         private static ChannelDto CreateChannelDto(string channelName)
