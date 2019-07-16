@@ -43,9 +43,9 @@ namespace VH.PluralsightScraper.Domain
 
             ChannelCourse[] missingCourses = 
                 channel.Courses
-                       .Where(dto => ChannelCourses.All(c => !string.Equals(c.Course.Name,
-                                                                            dto.CourseName,
-                                                                            StringComparison.CurrentCultureIgnoreCase)))
+                       .Where(courseDto => ChannelCourses.All(c => !string.Equals(c.Course.Name,
+                                                                                  courseDto.Name,
+                                                                                  StringComparison.CurrentCultureIgnoreCase)))
                        .Select(Course.ConvertFromDto)
                        .ToArray();
 
@@ -57,9 +57,9 @@ namespace VH.PluralsightScraper.Domain
             }
             
             IEnumerable<ChannelCourse> extraCourses =
-                ChannelCourses.Where(c => channel.Courses.All(dto => !string.Equals(dto.CourseName,
-                                                                                    c.Course.Name,
-                                                                                    StringComparison.CurrentCultureIgnoreCase)));
+                ChannelCourses.Where(c => channel.Courses.All(courseDto => !string.Equals(courseDto.Name,
+                                                                                          c.Course.Name,
+                                                                                          StringComparison.CurrentCultureIgnoreCase)));
 
             foreach (ChannelCourse c in extraCourses)
             {
@@ -69,8 +69,8 @@ namespace VH.PluralsightScraper.Domain
             
             IEnumerable<(ChannelCourse course, CourseDto courseDto)> existingCourses =
                 ChannelCourses.Join(channel.Courses,
-                                    c => c.Course.Name.ToLower(),
-                                    dto => dto.CourseName.ToLower(),
+                                    channelCourse => channelCourse.Course.Name.ToLower(),
+                                    courseDto => courseDto.Name.ToLower(),
                                     (c, dto) => ( c, dto ));
 
             foreach ((ChannelCourse channelCourse, CourseDto courseDto) in existingCourses)

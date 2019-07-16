@@ -8,7 +8,7 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
     {
         public ChannelCourse ConvertFromDto(CourseDto courseDto)
         {
-            string courseNameKey = courseDto.CourseName.ToLower();
+            string courseNameKey = courseDto.Name.ToLower();
 
             if (_channelCoursesMap.TryGetValue(courseNameKey, out ChannelCourse channelCourse))
             {

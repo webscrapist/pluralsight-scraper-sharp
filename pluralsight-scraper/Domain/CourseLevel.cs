@@ -1,6 +1,5 @@
 ﻿namespace VH.PluralsightScraper.Domain
 {
-    // santi: [next] anything special about enums in EF?
     internal enum CourseLevel
     {
         Advanced = 300,

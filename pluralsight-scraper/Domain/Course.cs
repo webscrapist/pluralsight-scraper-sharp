@@ -9,41 +9,41 @@ namespace VH.PluralsightScraper.Domain
         public int Id { get; private set; }
         public string Name { get; private set; }
         public CourseLevel Level { get; private set; }
-        public DateTime Date { get; private set; }
+        public DateTime DatePublished { get; private set; }
         public ICollection<ChannelCourse> CourseChannels { get; private set; }
 
-        public Course(string name, CourseLevel level, DateTime date)
+        public Course(string name, CourseLevel level, DateTime datePublished)
         {
             Name = name;
             Level = level;
-            Date = date;
+            DatePublished = datePublished;
             CourseChannels = new List<ChannelCourse>();
         }
         
-        public static ChannelCourse ConvertFromDto(CourseDto dto)
+        public static ChannelCourse ConvertFromDto(CourseDto courseDto)
         {
-            string name = dto.CourseName;
-            CourseLevel level = dto.CourseLevel.ToEnum();
-            DateTime date = DateTime.Parse(dto.CourseDate);
+            string name = courseDto.Name;
+            CourseLevel level = courseDto.Level.ToEnum();
+            DateTime datePublished = DateTime.Parse(courseDto.DatePublished);
 
-            var course = new Course(name, level, date);
+            var course = new Course(name, level, datePublished);
 
             return new ChannelCourse(course);
         }
 
-        public bool Merge(CourseDto dto)
+        public bool Merge(CourseDto courseDto)
         {
             var changed = false;
 
-            DateTime newDate = DateTime.Parse(dto.CourseDate);
+            DateTime newDatePublished = DateTime.Parse(courseDto.DatePublished);
 
-            if (Date != newDate)
+            if (DatePublished != newDatePublished)
             {
-                Date = newDate;
+                DatePublished = newDatePublished;
                 changed = true;
             }
 
-            CourseLevel newLevel = dto.CourseLevel.ToEnum();
+            CourseLevel newLevel = courseDto.Level.ToEnum();
 
             if (Level == newLevel)
             {
@@ -59,7 +59,7 @@ namespace VH.PluralsightScraper.Domain
         {
             Name = otherCourse.Name;
             Level = otherCourse.Level;
-            Date = otherCourse.Date;
+            DatePublished = otherCourse.DatePublished;
         }
     }
 }

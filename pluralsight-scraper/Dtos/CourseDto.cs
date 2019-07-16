@@ -2,17 +2,17 @@
 {
     internal class CourseDto
     {
-        public string CourseName { get; set; }
-        public string CourseLevel { get; set; }
-        public string CourseDate { get; set; }
+        public string Name { get; set; }
+        public string Level { get; set; }
+        public string DatePublished { get; set; }
 
-        public static CourseDto Create(string courseName, string courseLevel, string courseDate)
+        public static CourseDto Create(string name, string level, string datePublished)
         {
             return new CourseDto
                    {
-                       CourseName = courseName,
-                       CourseLevel = courseLevel,
-                       CourseDate = courseDate
+                       Name = name,
+                       Level = level,
+                       DatePublished = datePublished
                    };
         }
     }
