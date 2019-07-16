@@ -16,11 +16,11 @@ namespace VH.PluralsightScraper
 {
     internal class Program
     {
-        public Program()
+        static Program()
         {
-            _replicator = CompositionRoot.CreateChannelsReplicator(Configuration);
+            Replicator = CompositionRoot.CreateChannelsReplicator(Configuration);
         }
-
+        
         public static async Task Main(string[] args)
         {
             try
@@ -68,7 +68,7 @@ namespace VH.PluralsightScraper
 
         private static async Task ReplicateChannels(IEnumerable<ChannelDto> channels)
         {
-            ReplicateResult result = await _replicator.Replicate(channels, _cancellation.Token);
+            ReplicateResult result = await Replicator.Replicate(channels, _cancellation.Token);
             ConsoleView.Show(result);
         }
 
@@ -79,6 +79,6 @@ namespace VH.PluralsightScraper
                 .Build();
 
         private static CancellationTokenSource _cancellation;
-        private static ChannelsReplicator _replicator;
+        private static readonly ChannelsReplicator Replicator;
     }
 }
