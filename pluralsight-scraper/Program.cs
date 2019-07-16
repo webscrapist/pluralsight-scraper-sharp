@@ -46,7 +46,6 @@ namespace VH.PluralsightScraper
             catch (Exception e)
             {
                 Log.Fatal(e, "app crashed");
-                ConsoleView.Show(e);
             }
             finally
             {
