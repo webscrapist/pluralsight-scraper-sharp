@@ -94,6 +94,8 @@ namespace VH.PluralsightScraper
   });
 }";
 
+            // santi: IT SEEMS THAT SELECTORS ARE NOT CAPTURING COURSE DATA
+
             return await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
         }
 
@@ -109,7 +111,7 @@ namespace VH.PluralsightScraper
 
                 channelName = await GetChannelName(page);
 
-                IEnumerable<CourseDto> courses = await GetCourses(page);
+                IEnumerable<CourseDto> courses = await GetCourses(page);  // santi: to array
 
                 return new ChannelDto(url, channelName, courses);
             }
