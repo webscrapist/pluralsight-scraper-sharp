@@ -6,9 +6,8 @@ dotnet run -username santiago@vasquezhouse.com -password aburra75 -headless fals
 
 ## To Do
 
-- persist results somewhere so they can be used to define sequence of courses, specially for PowerShell channel
+- check `todo` markers in the code
 
-- have some todo markers in the code
 
 
 ### Puppeteer-Sharp
@@ -18,3 +17,4 @@ dotnet run -username santiago@vasquezhouse.com -password aburra75 -headless fals
 ### Puppeteer
 - https://github.com/thisispaulsmith/Puppeteer
 - https://pptr.dev
+
