@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Serilog;
 using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper.Domain
@@ -9,10 +10,10 @@ namespace VH.PluralsightScraper.Domain
         public int Id { get; private set; }
         public string Name { get; private set; }
         public CourseLevel Level { get; private set; }
-        public DateTime DatePublished { get; private set; }
+        public DateTime? DatePublished { get; private set; }
         public ICollection<ChannelCourse> CourseChannels { get; private set; }
 
-        public Course(string name, CourseLevel level, DateTime datePublished)
+        public Course(string name, CourseLevel level, DateTime? datePublished)
         {
             Name = name;
             Level = level;
@@ -24,7 +25,24 @@ namespace VH.PluralsightScraper.Domain
         {
             string name = courseDto.Name;
             CourseLevel level = courseDto.Level.ToEnum();
-            DateTime datePublished = DateTime.Parse(courseDto.DatePublished);
+
+            DateTime? datePublished = null;
+
+            if (courseDto.DatePublished == null)
+            {
+                Log.Warning("missing date for course: [{CourseName}]", name);
+            }
+            else
+            {
+                if (DateTime.TryParse(courseDto.DatePublished, out DateTime tempDatePublished))
+                {
+                    datePublished = tempDatePublished;
+                }
+                else
+                {
+                    Log.Warning("invalid date [{DatePublished}] for course: [{CourseName}]", courseDto.DatePublished, name);
+                }
+            }
 
             var course = new Course(name, level, datePublished);
 
