@@ -17,7 +17,7 @@ namespace VH.PluralsightScraper
 
         public static ChannelsReplicator CreateChannelsReplicator(IConfiguration configuration)
         {
-            string postgreSqlConnString = configuration.GetConnectionString("PluralsightData");
+            string postgreSqlConnString = configuration.GetPostgreSqlConnString();
 
             ILoggerFactory serilogFactory = new LoggerFactory().AddSerilog();
 

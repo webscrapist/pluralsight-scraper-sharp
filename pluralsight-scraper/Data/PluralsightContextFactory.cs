@@ -5,7 +5,7 @@ using VH.PluralsightScraper.Authentication;
 namespace VH.PluralsightScraper.Data
 {
     /// <summary>
-    /// used at design time by migrations
+    /// used by migrations
     /// </summary>
     internal class PluralsightContextFactory : IDesignTimeDbContextFactory<PluralsightContext>
     {
@@ -13,9 +13,11 @@ namespace VH.PluralsightScraper.Data
 
         public PluralsightContext CreateDbContext(string[] args)
         {
-            const string FAKE_CONNECTION_STRING = "host=foo-host;port=5432;database=foo-database;user id=foo-user;password=foo-password";
+            string postgreSqlConnString = Program.Configuration.GetPostgreSqlConnString();
 
-            DbContextOptions options = new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(FAKE_CONNECTION_STRING).Options;
+            DbContextOptions options = new DbContextOptionsBuilder<PluralsightContext>()
+                                       .UseNpgsql(postgreSqlConnString)
+                                       .Options;
 
             var session = new WindowsSession();
             

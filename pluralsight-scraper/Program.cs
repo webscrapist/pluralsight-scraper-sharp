@@ -73,10 +73,11 @@ namespace VH.PluralsightScraper
             ConsoleView.Show(result);
         }
 
-        private static readonly IConfiguration Configuration = new ConfigurationBuilder()
-                                                               .SetBasePath(Directory.GetCurrentDirectory())
-                                                               .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false)
-                                                               .Build();
+        internal static readonly IConfiguration Configuration =
+            new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("AppSettings.json", optional: false, reloadOnChange: false)
+                .Build();
 
         private static CancellationTokenSource _cancellation;
         private static ChannelsReplicator _replicator;
