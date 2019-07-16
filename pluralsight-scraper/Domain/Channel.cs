@@ -7,8 +7,9 @@ using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper.Domain
 {
-    internal class Channel : EntityBase
+    internal class Channel : IDomainEntity
     {
+        public int Id { get; private set; }
         public string Name { get; private set; }
         public string Url { get; private set; }
         public List<ChannelCourse> ChannelCourses { get; private set; }

@@ -2,8 +2,12 @@
 
 namespace VH.PluralsightScraper.Domain
 {
-    internal class ChannelCourse : EntityBase
+    internal class ChannelCourse : IDomainEntity
     {
+        public int Id { get; private set; }
+        public int ChannelId { get; private set; }
+        public int CourseId { get; private set; }
+        
         public Channel Channel { get; private set; }
 
         public Course Course
@@ -16,10 +20,6 @@ namespace VH.PluralsightScraper.Domain
                 CourseId = value.Id;
             }
         }
-
-        public int ChannelId { get; private set; }
-
-        public int CourseId { get; private set; }
 
         public ChannelCourse(Course course)
         {

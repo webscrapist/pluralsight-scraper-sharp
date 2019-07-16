@@ -4,8 +4,9 @@ using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper.Domain
 {
-    internal class Course : EntityBase
+    internal class Course : IDomainEntity
     {
+        public int Id { get; private set; }
         public string Name { get; private set; }
         public CourseLevel Level { get; private set; }
         public DateTime Date { get; private set; }
