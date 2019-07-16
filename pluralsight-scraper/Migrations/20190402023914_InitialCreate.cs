@@ -4,8 +4,6 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace VH.PluralsightScraper.Migrations
 {
-    // santi: [next] move migrations folder under Data namespace
-
     public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

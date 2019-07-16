@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 
+// santi: [next] generate initial migration again
+// santi: [next] move migrations folder under Data namespace
+// santi: [next] run app against postgre
+
 namespace VH.PluralsightScraper
 {
     internal static class ArgsExtensions
