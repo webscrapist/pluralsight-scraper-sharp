@@ -1,8 +1,11 @@
 ﻿using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper
@@ -48,7 +51,14 @@ namespace VH.PluralsightScraper
             // santi: [next] refactor using page.QuerySelectorAllAsync()
             string jsSelectChannelName = $@"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
 
-            return await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
+            string channelName = await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
+
+            if (string.IsNullOrWhiteSpace(channelName))
+            {
+                Log.Error("channel name not found. ChannelPageUrl: [{ChannelPageUrl}]", page.Url);
+            }
+
+            return channelName;
         }
 
         private static async Task<IEnumerable<CourseDto>> GetCourses(Page page)
@@ -96,7 +106,59 @@ namespace VH.PluralsightScraper
 
             // santi: IT SEEMS THAT SELECTORS ARE NOT CAPTURING COURSE DATA
 
-            return await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
+            CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
+
+            LogMissingData(courses, channelPageUrl: page.Url);
+
+            return courses;
+        }
+
+        private static void LogMissingData(IReadOnlyCollection<CourseDto> courses, string channelPageUrl)
+        {
+            IEnumerable<CoursesMissingData> missingDetailsList = GetMissingDetails(courses);
+
+            foreach (CoursesMissingData missingData in missingDetailsList)
+            {
+                Log.Error("courses missing data. CourseFieldName: [{CourseFieldName}] " + 
+                          "MissingPercentage: [{MissingPercentage}] " + 
+                          "MissingCount: [{MissingCount}] " + 
+                          "TotalCoursesCount: [{TotalCoursesCount}] " + 
+                          "ChannelPageUrl: [{ChannelPageUrl}]",
+                          missingData.CourseFieldName,
+                          missingData.MissingPercentage,
+                          missingData.MissingCount,
+                          missingData.TotalCoursesCount,
+                          channelPageUrl);
+            }
+        }
+
+        private static IEnumerable<CoursesMissingData> GetMissingDetails(IReadOnlyCollection<CourseDto> courses)
+        {
+            Expression<Func<CourseDto, bool>> missingNameExpression          = course => string.IsNullOrWhiteSpace(course.Name);
+            Expression<Func<CourseDto, bool>> missingDatePublishedExpression = course => string.IsNullOrWhiteSpace(course.DatePublished);
+            Expression<Func<CourseDto, bool>> missingLevelExpression         = course => string.IsNullOrWhiteSpace(course.Level);
+
+            var courseFieldsList =
+                new[]
+                {
+                    new { MissingDataExpression = missingNameExpression          , FieldName = nameof(CourseDto.Name)          },
+                    new { MissingDataExpression = missingDatePublishedExpression , FieldName = nameof(CourseDto.DatePublished) },
+                    new { MissingDataExpression = missingLevelExpression         , FieldName = nameof(CourseDto.Level)         },
+                };
+
+            int totalCoursesCount = courses.Count;
+
+            return courseFieldsList.Select(fieldInfo =>
+                                           {
+                                               Func<CourseDto, bool> missingDataPredicate = fieldInfo.MissingDataExpression.Compile();
+
+                                               int missingCount = courses.Count(missingDataPredicate);
+
+                                               return new CoursesMissingData(fieldInfo.FieldName, 
+                                                                             missingCount, 
+                                                                             totalCoursesCount);
+                                           })
+                                   .Where(missingData => missingData.MissingCount > 0);
         }
 
         private static async Task<ChannelDto> GetChannelDetails(Page page, string url)
@@ -111,7 +173,7 @@ namespace VH.PluralsightScraper
 
                 channelName = await GetChannelName(page);
 
-                IEnumerable<CourseDto> courses = await GetCourses(page);  // santi: to array
+                IEnumerable<CourseDto> courses = await GetCourses(page);
 
                 return new ChannelDto(url, channelName, courses);
             }
@@ -148,5 +210,30 @@ namespace VH.PluralsightScraper
         private readonly BrowserFactory _browserFactory;
         private readonly string _username;
         private readonly string _password;
+    }
+
+    // santi: move
+    internal class CoursesMissingData
+    {
+        public string CourseFieldName { get; }
+        public double MissingPercentage { get; }
+        public int MissingCount { get; }
+        public int TotalCoursesCount { get; }
+
+        public CoursesMissingData(string courseFieldName, int missingCount, int totalCoursesCount)
+        {
+            CourseFieldName = courseFieldName;
+            MissingCount = missingCount;
+            TotalCoursesCount = totalCoursesCount;
+
+            if (totalCoursesCount == 0)
+            {
+                MissingPercentage = 0;
+            }
+            else
+            {
+                MissingPercentage = missingCount / (double) totalCoursesCount;
+            }
+        }
     }
 }
