@@ -80,9 +80,9 @@ namespace VH.PluralsightScraper
 
     if (isPluralsightPath) {
       return { 
-        courseName: courseName, 
-        courseLevel: 'pluralsight-path',
-        courseDate: ''
+        name: courseName, 
+        level: 'pluralsight-path',
+        datePublished: ''
       }
     }
 
@@ -90,16 +90,16 @@ namespace VH.PluralsightScraper
 
     if (isPluralsightCourse) {
       return { 
-        courseName: courseName, 
-        courseLevel: subSelectors[2].innerText,
-        courseDate: subSelectors[3].innerText
+        name: courseName, 
+        level: subSelectors[2].innerText,
+        datePublished: subSelectors[3].innerText
       }
     }
 
     return { 
-      courseName: courseName, 
-      courseLevel: 'unknown',
-      courseDate: ''
+      name: courseName, 
+      level: 'unknown',
+      datePublished: ''
     }
   });
 }";
@@ -107,7 +107,7 @@ namespace VH.PluralsightScraper
             // santi: IT SEEMS THAT SELECTORS ARE NOT CAPTURING COURSE DATA
 
             CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
-
+            
             LogMissingData(courses, channelPageUrl: page.Url);
 
             return courses;
