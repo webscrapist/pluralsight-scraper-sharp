@@ -86,7 +86,7 @@ namespace VH.PluralsightScraper
       }
     }
 
-    const isPluralsightCourse = subSelectors.length == 3;
+    const isPluralsightCourse = subSelectors.length == 5;
 
     if (isPluralsightCourse) {
       return { 
