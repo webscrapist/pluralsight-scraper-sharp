@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using VH.PluralsightScraper.Domain;
 using VH.PluralsightScraper.Dtos;
 
@@ -36,6 +37,12 @@ namespace VH.PluralsightScraper.Data
                 cancellationToken.ThrowIfCancellationRequested();
                 
                 ReplicateResult replicateResult;
+
+                if (string.IsNullOrWhiteSpace(dto.Name))
+                {
+                    Log.Error("channel without name. ChannelPageUrl: [{ChannelPageUrl}]", dto.Url);
+                    continue;
+                }
 
                 if (channelsByName.TryGetValue(dto.Name, out Channel channelDb))
                 {
