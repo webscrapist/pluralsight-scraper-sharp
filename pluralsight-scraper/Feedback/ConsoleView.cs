@@ -16,31 +16,7 @@ namespace VH.PluralsightScraper.Feedback
             Console.WriteLine("press Ctrl+C to cancel");
             Console.WriteLine("getting channels...");
         }
-
-        public static void Show(Exception exception)
-        {
-            ConsoleColor previousColor = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-
-            while (true)
-            {
-                Console.WriteLine(exception.Message);
-                Console.WriteLine(exception.StackTrace);
-
-                if (exception.InnerException != null)
-                {
-                    exception = exception.InnerException;
-                    Console.WriteLine("  ====== inner exception ======");
-
-                    continue;
-                }
-
-                break;
-            }
-
-            Console.ForegroundColor = previousColor;
-        }
-
+        
         public static void Show(IEnumerable<ChannelDto> channelsList)
         {
             ChannelDto[] sortedChannels = channelsList.OrderBy(_ => _.Name).ToArray();
