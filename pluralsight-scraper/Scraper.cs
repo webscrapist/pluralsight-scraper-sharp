@@ -79,7 +79,7 @@ namespace VH.PluralsightScraper
             string path = Path.Combine(Environment.CurrentDirectory, "GetCoursesDetails.js");
             string fileContents = File.ReadAllText(path);
 
-            return fileContents.Replace("${pluralsightPathLevel}", PLURALSIGHT_PATH_LEVEL);
+            return fileContents.Replace("${pluralsightPathLevel}", Constants.PLURALSIGHT_PATH_LEVEL);
         }
 
         private static void LogMissingData(IReadOnlyCollection<CourseDto> courses, string channelPageUrl)
@@ -104,7 +104,7 @@ namespace VH.PluralsightScraper
         private static IEnumerable<CoursesMissingData> GetMissingDetails(IReadOnlyCollection<CourseDto> courses)
         {
             Expression<Func<CourseDto, bool>> missingNameExpression          = course => string.IsNullOrWhiteSpace(course.Name);
-            Expression<Func<CourseDto, bool>> missingDatePublishedExpression = course => string.IsNullOrWhiteSpace(course.DatePublished) && course.Level != PLURALSIGHT_PATH_LEVEL;
+            Expression<Func<CourseDto, bool>> missingDatePublishedExpression = course => course.DatePublishedIsMissing;
             Expression<Func<CourseDto, bool>> missingLevelExpression         = course => string.IsNullOrWhiteSpace(course.Level);
 
             var courseFieldsList =
@@ -173,8 +173,6 @@ namespace VH.PluralsightScraper
 
             return await page.EvaluateExpressionAsync<string[]>(jsSelectAllAnchors);
         }
-
-        private const string PLURALSIGHT_PATH_LEVEL = "pluralsight-path";
 
         private readonly BrowserFactory _browserFactory;
         private readonly string _username;

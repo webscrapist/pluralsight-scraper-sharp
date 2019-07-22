@@ -1,4 +1,5 @@
 ﻿using System;
+using VH.PluralsightScraper.Domain;
 
 namespace VH.PluralsightScraper.Dtos
 {
@@ -22,6 +23,8 @@ namespace VH.PluralsightScraper.Dtos
         }
 
         public string ComparisonKey => CreateComparisonKey(Name, DatePublishedParsed);
+
+        public bool DatePublishedIsMissing => DatePublishedParsed == null && Level != Constants.PLURALSIGHT_PATH_LEVEL;
 
         public static CourseDto Create(string name, string level, string datePublished)
         {

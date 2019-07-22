@@ -16,18 +16,11 @@ namespace VH.PluralsightScraper.Domain
             string name = courseDto.Name;
             CourseLevel level = courseDto.Level.ToEnum();
 
-            if (string.IsNullOrWhiteSpace(courseDto.DatePublished))
+            if (courseDto.DatePublishedIsMissing)
             {
-                Log.Warning("missing date for course: [{CourseName}]", name);
+                Log.Warning("missing or invalid date [{DatePublished}] for course: [{CourseName}]", courseDto.DatePublished, name);
             }
-            else
-            {
-                if (courseDto.DatePublishedParsed == null)
-                {
-                    Log.Warning("invalid date [{DatePublished}] for course: [{CourseName}]", courseDto.DatePublished, name);
-                }
-            }
-
+            
             course = new Course(name, level, courseDto.DatePublishedParsed);
 
             _coursesMap.Add(courseDto.ComparisonKey, course);
