@@ -10,14 +10,14 @@ namespace VH.PluralsightScraper.Data.EFConfigs
 
         public void Configure(EntityTypeBuilder<Channel> builder)
         {
-            builder.Property(c => c.Name)
+            builder.Property(channel => channel.Name)
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.HasIndex(c => new { c.Name })
+            builder.HasIndex(channel => new { channel.Name })
                    .IsUnique();
 
-            builder.Property(c => c.Url)
+            builder.Property(channel => channel.Url)
                    .IsRequired()
                    .HasMaxLength(100);
         }

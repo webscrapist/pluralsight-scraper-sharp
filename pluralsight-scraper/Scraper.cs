@@ -19,6 +19,7 @@ namespace VH.PluralsightScraper
             _password = password ?? throw new ArgumentNullException(nameof(password));
         }
 
+        // santi: cancellation token not used
         public async Task<IEnumerable<ChannelDto>> GetChannels(CancellationToken cancellationToken)
         {
             var channelsList = new List<ChannelDto>();
