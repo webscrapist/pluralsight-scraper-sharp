@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VH.PluralsightScraper.Data;
@@ -9,9 +10,10 @@ using VH.PluralsightScraper.Data;
 namespace VH.PluralsightScraper.Migrations
 {
     [DbContext(typeof(PluralsightContext))]
-    partial class PluralsightContextModelSnapshot : ModelSnapshot
+    [Migration("20190720163534_ChannelCourseUniqueIndex")]
+    partial class ChannelCourseUniqueIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -108,7 +110,7 @@ namespace VH.PluralsightScraper.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name", "DatePublished")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Courses");
