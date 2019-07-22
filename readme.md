@@ -1,7 +1,7 @@
 ## To Run
 
 ```
-dotnet run -username santiago@vasquezhouse.com -password aburra75 -headless false
+dotnet run -username santiago@vasquezhouse.com -password aburra75 -headless false -isFastRun false
 ```
 
 ## To Do
