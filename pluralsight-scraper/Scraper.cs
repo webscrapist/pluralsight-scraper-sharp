@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
+using VH.PluralsightScraper.Domain;
 using VH.PluralsightScraper.Dtos;
 
 namespace VH.PluralsightScraper
@@ -105,7 +106,7 @@ namespace VH.PluralsightScraper
   });
 }";
 
-            // santi: IT SEEMS THAT SELECTORS ARE NOT CAPTURING COURSE DATA
+            // santi: [next] errors in log
 
             CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
             
@@ -211,30 +212,5 @@ namespace VH.PluralsightScraper
         private readonly BrowserFactory _browserFactory;
         private readonly string _username;
         private readonly string _password;
-    }
-
-    // santi: move
-    internal class CoursesMissingData
-    {
-        public string CourseFieldName { get; }
-        public double MissingPercentage { get; }
-        public int MissingCount { get; }
-        public int TotalCoursesCount { get; }
-
-        public CoursesMissingData(string courseFieldName, int missingCount, int totalCoursesCount)
-        {
-            CourseFieldName = courseFieldName;
-            MissingCount = missingCount;
-            TotalCoursesCount = totalCoursesCount;
-
-            if (totalCoursesCount == 0)
-            {
-                MissingPercentage = 0;
-            }
-            else
-            {
-                MissingPercentage = missingCount / (double) totalCoursesCount;
-            }
-        }
     }
 }
