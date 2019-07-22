@@ -54,16 +54,9 @@ namespace VH.PluralsightScraper
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
             //await channelPage.WaitForSelectorAsync(TITLE_SELECTOR);
 
-            string jsSelectChannelName = $@"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
+            string jsSelectChannelName = $"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
 
-            string channelName = await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
-            
-            if (string.IsNullOrWhiteSpace(channelName))
-            {
-                Log.Error("channel name not found. ChannelPageUrl: [{ChannelPageUrl}]", page.Url);
-            }
-
-            return channelName;
+            return await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
         }
 
         private static async Task<IEnumerable<CourseDto>> GetCourses(Page channelPage)
@@ -143,10 +136,8 @@ namespace VH.PluralsightScraper
 
             try
             {
-                await page.GoToAsync(url);
-
-                await page.WaitForTimeoutAsync(milliseconds: 1000);
-
+                await page.GoToAsync(url, WaitUntilNavigation.Networkidle2);
+                
                 channelName = await GetChannelName(page);
 
                 IEnumerable<CourseDto> courses = await GetCourses(page);
@@ -161,7 +152,7 @@ namespace VH.PluralsightScraper
 
         private async Task Login(Page page)
         {
-            await page.GoToAsync("https://app.pluralsight.com/id/signin");
+            await page.GoToAsync("https://app.pluralsight.com/id/signin", WaitUntilNavigation.Networkidle2);
 
             await page.TypeAsync("#Username", _username);
             await page.TypeAsync("#Password", _password);
@@ -172,7 +163,7 @@ namespace VH.PluralsightScraper
 
         private static async Task<IEnumerable<string>> GetChannelUrls(Page page)
         {
-            await page.GoToAsync("https://app.pluralsight.com/channels");
+            await page.GoToAsync("https://app.pluralsight.com/channels", WaitUntilNavigation.Networkidle2);
 
             const string CHANNEL_LINKS_SELECTOR = "li.N4XCI-0S a";
 
