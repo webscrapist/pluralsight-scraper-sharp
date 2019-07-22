@@ -27,6 +27,8 @@ namespace VH.PluralsightScraper
             {
                 SerilogManager.Init(Configuration);
 
+                Log.Information("********************  APP STARTED  ********************");
+                
                 string username = args.Username();
                 string password = args.Password();
                 bool headless = args.RunHeadless();
@@ -50,6 +52,7 @@ namespace VH.PluralsightScraper
             }
             finally
             {
+                Log.Information("********************  APP FINISHED ********************");
                 SerilogManager.Close();
             }
         }
