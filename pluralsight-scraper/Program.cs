@@ -29,7 +29,8 @@ namespace VH.PluralsightScraper
 
                 string username = args.Username();
                 string password = args.Password();
-                bool headless = args.Headless();
+                bool headless = args.RunHeadless();
+                bool isFastRun = args.IsFastRun();
 
                 _cancellation = new CancellationTokenSource();
 
@@ -39,7 +40,7 @@ namespace VH.PluralsightScraper
                                               _cancellation.Cancel();
                                           };
 
-                IEnumerable<ChannelDto> channels = await GetChannels(username, password, headless);
+                IEnumerable<ChannelDto> channels = await GetChannels(username, password, headless, isFastRun);
 
                 await ReplicateChannels(channels);
             }
@@ -53,13 +54,16 @@ namespace VH.PluralsightScraper
             }
         }
 
-        private static async Task<IEnumerable<ChannelDto>> GetChannels(string username, string password, bool headless)
+        private static async Task<IEnumerable<ChannelDto>> GetChannels(string username, 
+                                                                       string password, 
+                                                                       bool headless, 
+                                                                       bool isFastRun)
         {
             ConsoleView.ShowGettingChannels();
 
             Scraper scraper = CompositionRoot.CreateScraper(username, password, headless);
 
-            ChannelDto[] channels = (await scraper.GetChannels(_cancellation.Token)).ToArray();
+            ChannelDto[] channels = (await scraper.GetChannels(isFastRun, _cancellation.Token)).ToArray();
 
             ConsoleView.Show(channels);
 

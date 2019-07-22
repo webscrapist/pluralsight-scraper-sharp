@@ -1,6 +1,7 @@
 ﻿using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -20,7 +21,7 @@ namespace VH.PluralsightScraper
             _password = password ?? throw new ArgumentNullException(nameof(password));
         }
 
-        public async Task<IEnumerable<ChannelDto>> GetChannels(CancellationToken cancellationToken)
+        public async Task<IEnumerable<ChannelDto>> GetChannels(bool isFastRun, CancellationToken cancellationToken)
         {
             var channelsList = new List<ChannelDto>();
 
@@ -29,7 +30,12 @@ namespace VH.PluralsightScraper
             {
                 await Login(page);
                 
-                IEnumerable<string> channelUrls =  await GetChannelUrls(page);
+                IEnumerable<string> channelUrls = await GetChannelUrls(page);
+
+                if (isFastRun)
+                {
+                    channelUrls = channelUrls.Take(1);
+                }
 
                 // santi: [next] consider doing this in parallel
                 foreach (string url in channelUrls.TakeWhile(url => !cancellationToken.IsCancellationRequested))
@@ -47,9 +53,9 @@ namespace VH.PluralsightScraper
             const string TITLE_SELECTOR = "h1";
 
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
-            //await page.WaitForSelectorAsync(TITLE_SELECTOR);
+            //await channelPage.WaitForSelectorAsync(TITLE_SELECTOR);
 
-            // santi: [next] refactor using page.QuerySelectorAllAsync()
+            // santi: [next] refactor using channelPage.QuerySelectorAllAsync()
             string jsSelectChannelName = $@"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
 
             string channelName = await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
@@ -62,54 +68,27 @@ namespace VH.PluralsightScraper
             return channelName;
         }
 
-        private static async Task<IEnumerable<CourseDto>> GetCourses(Page page)
+        private static async Task<IEnumerable<CourseDto>> GetCourses(Page channelPage)
         {
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
             //const string COURSES_SELECTOR = "ul._1Ws76NZ6";
-            //await page.WaitForSelectorAsync(COURSES_SELECTOR);
+            //await channelPage.WaitForSelectorAsync(COURSES_SELECTOR);
 
-            // santi: [next] consider moving this to a js file
-            string jsFunctionToGetCoursesDetails = $@"() => {{
-  const selectors = Array.from(document.querySelectorAll('div.css-kxulf3 a'));
+            string jsFunctionToGetCoursesDetails = GetCourseDetailsFunction();
 
-  return selectors.map(s => {{
-    const courseName = s.innerText;
-
-    const subSelectors = Array.from(s.parentNode.parentNode.parentNode.parentNode.querySelectorAll('span.css-1kcrbi9'));
-
-    const isPluralsightPath = subSelectors.length == 2;
-
-    if (isPluralsightPath) {{
-      return {{ 
-        name: courseName, 
-        level: '{PLURALSIGHT_PATH_LEVEL}',
-        datePublished: ''
-      }}
-    }}
-
-    const isPluralsightCourse = subSelectors.length == 5;
-
-    if (isPluralsightCourse) {{
-      return {{ 
-        name: courseName, 
-        level: subSelectors[2].innerText,
-        datePublished: subSelectors[3].innerText
-      }}
-    }}
-
-    return {{ 
-      name: courseName, 
-      level: 'unknown',
-      datePublished: ''
-    }}
-  }});
-}}";
-
-            CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(jsFunctionToGetCoursesDetails);
+            CourseDto[] courses = await channelPage.EvaluateFunctionAsync<CourseDto[]>(jsFunctionToGetCoursesDetails);
             
-            LogMissingData(courses, channelPageUrl: page.Url);
+            LogMissingData(courses, channelPage.Url);
 
             return courses;
+        }
+
+        private static string GetCourseDetailsFunction()
+        {
+            string path = Path.Combine(Environment.CurrentDirectory, "GetCoursesDetails.js");
+            string fileContents = File.ReadAllText(path);
+
+            return fileContents.Replace("${pluralsightPathLevel}", PLURALSIGHT_PATH_LEVEL);
         }
 
         private static void LogMissingData(IReadOnlyCollection<CourseDto> courses, string channelPageUrl)
@@ -201,7 +180,7 @@ namespace VH.PluralsightScraper
 
             await page.WaitForSelectorAsync(CHANNEL_LINKS_SELECTOR);
 
-            string jsSelectAllAnchors = $@"Array.from(document.querySelectorAll('{CHANNEL_LINKS_SELECTOR}')).map(a => a.href);";
+            string jsSelectAllAnchors = $"Array.from(document.querySelectorAll('{CHANNEL_LINKS_SELECTOR}')).map(a => a.href);";
 
             return await page.EvaluateExpressionAsync<string[]>(jsSelectAllAnchors);
         }
