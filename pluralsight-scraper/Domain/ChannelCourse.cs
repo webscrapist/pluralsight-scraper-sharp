@@ -16,7 +16,6 @@
             {
                 _course = value;
 
-                // santi: [next] why am I setting the id manually? Do I really need to do this? what would break if I don't?
                 if (value != null)
                 {
                     CourseId = value.Id;
