@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using VH.PluralsightScraper.Dtos;
-
-// santi: [next] Read brent ozar "the case of entity framework core's odd sql"
 
 namespace VH.PluralsightScraper.Domain
 {

@@ -37,7 +37,6 @@ namespace VH.PluralsightScraper
                     channelUrls = channelUrls.Take(1);
                 }
 
-                // santi: [next] consider doing this in parallel
                 foreach (string url in channelUrls.TakeWhile(url => !cancellationToken.IsCancellationRequested))
                 {
                     ChannelDto channel = await GetChannelDetails(page, url);
@@ -55,11 +54,10 @@ namespace VH.PluralsightScraper
             // todo: for some reason this times out after a few successful calls, not sure why, using a hardcoded timeout in caller method
             //await channelPage.WaitForSelectorAsync(TITLE_SELECTOR);
 
-            // santi: [next] refactor using channelPage.QuerySelectorAllAsync()
             string jsSelectChannelName = $@"Array.from(document.querySelectorAll('{TITLE_SELECTOR}')).map(h => h.innerText)[0];";
 
             string channelName = await page.EvaluateExpressionAsync<string>(jsSelectChannelName);
-
+            
             if (string.IsNullOrWhiteSpace(channelName))
             {
                 Log.Error("channel name not found. ChannelPageUrl: [{ChannelPageUrl}]", page.Url);
