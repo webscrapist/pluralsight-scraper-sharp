@@ -14,24 +14,30 @@ namespace VH.PluralsightScraper.Domain
         public string Url { get; private set; }
         public List<ChannelCourse> ChannelCourses { get; private set; }
 
-        public Channel(ChannelDto channelDto)
+        public Channel(ChannelDto channelDto, EntityFactory entityFactory)
         {
             Name = channelDto.Name;
             Url = channelDto.Url;
 
             ChannelCourses = channelDto.Courses
-                                       .Select(Course.ConvertFromDto)
+                                       .Select(courseDto =>
+                                               {
+                                                   Course course = entityFactory.CreateCourse(courseDto);
+                                                   return entityFactory.CreateChannelCourse(channel: this, course);
+                                               })
                                        .ToList();
         }
 
-        public Channel(string name, string url, IEnumerable<Course> courses)
+        public Channel(string name, string url, IEnumerable<Course> coursesList, EntityFactory entityFactory)
         {
             Name = name;
             Url = url;
-            ChannelCourses = courses.Select(c => new ChannelCourse(c)).ToList();
+
+            ChannelCourses = coursesList.Select(course => entityFactory.CreateChannelCourse(channel: this, course))
+                                        .ToList();
         }
         
-        public bool Merge(ChannelDto channel)
+        public bool Merge(ChannelDto channel, EntityFactory entityFactory)
         {
             var changed = false;
 
@@ -41,25 +47,15 @@ namespace VH.PluralsightScraper.Domain
                 changed = true;
             }
 
-            ChannelCourse[] missingCourses = 
-                channel.Courses
-                       .Where(courseDto => ChannelCourses.All(c => !string.Equals(c.Course.Name,
-                                                                                  courseDto.Name,
-                                                                                  StringComparison.CurrentCultureIgnoreCase)))
-                       .Select(Course.ConvertFromDto)
-                       .ToArray();
-
-            ChannelCourses.AddRange(missingCourses);
+            ChannelCourse[] missingCourses = FindMissingCourses(channel, entityFactory);
+            ChannelCourse[] extraCourses = FindExtraCourses(channel).ToArray();
+            (ChannelCourse c, CourseDto dto)[] existingCourses = FindExistingCourses(channel).ToArray();
 
             if (missingCourses.Any())
             {
+                ChannelCourses.AddRange(missingCourses);
                 changed = true;
             }
-            
-            IEnumerable<ChannelCourse> extraCourses =
-                ChannelCourses.Where(c => channel.Courses.All(courseDto => !string.Equals(courseDto.Name,
-                                                                                          c.Course.Name,
-                                                                                          StringComparison.CurrentCultureIgnoreCase)));
 
             foreach (ChannelCourse c in extraCourses)
             {
@@ -67,12 +63,6 @@ namespace VH.PluralsightScraper.Domain
                 changed = true;
             }
             
-            IEnumerable<(ChannelCourse course, CourseDto courseDto)> existingCourses =
-                ChannelCourses.Join(channel.Courses,
-                                    channelCourse => channelCourse.Course.Name.ToLower(),
-                                    courseDto => courseDto.Name.ToLower(),
-                                    (c, dto) => ( c, dto ));
-
             foreach ((ChannelCourse channelCourse, CourseDto courseDto) in existingCourses)
             {
                 bool courseChanged = channelCourse.Course.Merge(courseDto);
@@ -86,7 +76,36 @@ namespace VH.PluralsightScraper.Domain
             return changed;
         }
 
-        // ReSharper disable once UnusedMember.Local
+        private IEnumerable<(ChannelCourse c, CourseDto dto)> FindExistingCourses(ChannelDto channel)
+        {
+            return ChannelCourses.Join(channel.Courses,
+                                       channelCourse => channelCourse.Course.ComparisonKey,
+                                       courseDto => courseDto.ComparisonKey,
+                                       (c, dto) => ( c, dto ))
+                                 .ToArray();
+        }
+
+        private IEnumerable<ChannelCourse> FindExtraCourses(ChannelDto channel)
+        {
+            return ChannelCourses.Where(cc => channel.Courses.All(courseDto => cc.Course.ComparisonKey != courseDto.ComparisonKey))
+                                 .ToArray();
+        }
+
+        private ChannelCourse[] FindMissingCourses(ChannelDto channel, EntityFactory entityFactory)
+        {
+            return channel.Courses
+
+                          .Where(courseDto => ChannelCourses.All(cc => cc.Course.ComparisonKey != courseDto.ComparisonKey))
+                          
+                          .Select(courseDto =>
+                                  {
+                                      Course course = entityFactory.CreateCourse(courseDto);
+                                      return entityFactory.CreateChannelCourse(channel: this, course);
+                                  })
+                          
+                          .ToArray();
+        }
+
         private Channel()
         {
             // empty for entity framework

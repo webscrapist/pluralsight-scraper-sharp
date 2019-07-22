@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VH.PluralsightScraper.Domain
+﻿namespace VH.PluralsightScraper.Domain
 {
     internal class ChannelCourse : IDomainEntity
     {
@@ -16,13 +14,19 @@ namespace VH.PluralsightScraper.Domain
 
             set
             {
-                _course = value ?? throw new ArgumentNullException(nameof(value));
-                CourseId = value.Id;
+                _course = value;
+
+                // santi: why am I setting the id manually? Do I really need to do this? what would break if I don't?
+                if (value != null)
+                {
+                    CourseId = value.Id;
+                }
             }
         }
 
-        public ChannelCourse(Course course)
+        public ChannelCourse(Channel channel, Course course)
         {
+            Channel = channel;
             Course = course;
         }
 

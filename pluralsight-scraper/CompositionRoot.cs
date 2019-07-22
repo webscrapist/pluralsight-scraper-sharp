@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using VH.PluralsightScraper.Authentication;
 using VH.PluralsightScraper.Data;
+using VH.PluralsightScraper.Domain;
 
 namespace VH.PluralsightScraper
 {
@@ -31,7 +32,9 @@ namespace VH.PluralsightScraper
 
             var pluralsightContext = new PluralsightContext(options, session);
 
-            return new ChannelsReplicator(pluralsightContext);
+            var entityFactory = new EntityFactory();
+
+            return new ChannelsReplicator(pluralsightContext, entityFactory);
         }
     }
 }

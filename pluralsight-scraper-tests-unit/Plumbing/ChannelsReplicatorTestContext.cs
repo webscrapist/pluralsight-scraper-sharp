@@ -40,12 +40,11 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
             ChannelDto channelDto = CreateChannelDto(FOO_CHANNEL_NAME_UPDATED);
 
             List<Course> onlyOneCourse = channelDto.Courses
-                                                   .Select(_courseFactory.ConvertFromDto)
-                                                   .Select(c => c.Course)
+                                                   .Select(_entityFactory.CreateCourse)
                                                    .Take(1)
                                                    .ToList();
             
-            var channelInDb = new Channel(channelDto.Name, channelDto.Url, onlyOneCourse);
+            var channelInDb = new Channel(channelDto.Name, channelDto.Url, onlyOneCourse, _entityFactory);
 
             _channelsDbRecords = new List<Channel>(_channelsDbRecords)
                                  {
@@ -63,11 +62,10 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
             ChannelDto dto = CreateChannelDto(FOO_CHANNEL_NAME_UNCHANGED);
 
             List<Course> courses = dto.Courses
-                                      .Select(_courseFactory.ConvertFromDto)
-                                      .Select(c => c.Course)
+                                      .Select(_entityFactory.CreateCourse)
                                       .ToList();
             
-            var channelInDb = new Channel(dto.Name, dto.Url, courses);
+            var channelInDb = new Channel(dto.Name, dto.Url, courses, _entityFactory);
 
             _channelsDbRecords = new List<Channel>(_channelsDbRecords)
                                  {
@@ -85,11 +83,10 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
             ChannelDto channelDto = CreateChannelDto(FOO_CHANNEL_NAME_DELETED);
 
             List<Course> courses = channelDto.Courses
-                                             .Select(_courseFactory.ConvertFromDto)
-                                             .Select(c => c.Course)
+                                             .Select(_entityFactory.CreateCourse)
                                              .ToList();
             
-            var channelInDb = new Channel(channelDto.Name, channelDto.Url, courses);
+            var channelInDb = new Channel(channelDto.Name, channelDto.Url, courses, _entityFactory);
 
             _channelsDbRecords = new List<Channel>(_channelsDbRecords)
                                  {
@@ -115,7 +112,9 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
 
                 using (PluralsightContext dbContext = await dbContextFactory.Create(cancellationToken))
                 {
-                    var sut = new ChannelsReplicator(dbContext);
+                    var entityFactory = new EntityFactory();
+                    var sut = new ChannelsReplicator(dbContext, entityFactory);
+
                     _result = await sut.Replicate(_channelsToReplicate, cancellationToken);
                 }
             }
@@ -272,6 +271,6 @@ namespace VH.PluralsightScraper.Tests.Unit.Plumbing
         private bool _expectingException;
         private ReplicateResult _result;
         private Exception _exception;
-        private readonly CourseFactory _courseFactory = new CourseFactory();
+        private readonly EntityFactory _entityFactory = new EntityFactory();
     }
 }

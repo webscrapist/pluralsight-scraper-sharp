@@ -12,58 +12,58 @@ namespace VH.PluralsightScraper.Data
 {
     internal class ChannelsReplicator
     {
-        public ChannelsReplicator(PluralsightContext pluralsightContext)
+        public ChannelsReplicator(PluralsightContext pluralsightContext, EntityFactory entityFactory)
         {
             _db = pluralsightContext ?? throw new ArgumentNullException(nameof(pluralsightContext));
+            _entityFactory = entityFactory ?? throw new ArgumentNullException(nameof(entityFactory));
         }
 
-        public async Task<ReplicateResult> Replicate(IEnumerable<ChannelDto> dtosList,
+        public async Task<ReplicateResult> Replicate(IEnumerable<ChannelDto> channelDtosList,
                                                      CancellationToken cancellationToken)
         {
-            if (dtosList == null)
+            if (channelDtosList == null)
             {
                 return ReplicateResult.BuildEmpty();
             }
 
-            Dictionary<string, Channel> channelsByName = await _db.Channels
-                                                                  .Include(c => c.ChannelCourses)
-                                                                  .ThenInclude(channelCourses => channelCourses.Course)
-                                                                  .ToDictionaryAsync(c => c.Name, cancellationToken);
+            Dictionary<string, Channel> channelsDbByName = await _db.Channels.Include(c => c.ChannelCourses)
+                                                                    .ThenInclude(channelCourses => channelCourses.Course)
+                                                                    .ToDictionaryAsync(c => c.Name, cancellationToken);
 
             var result = new ReplicateResult();
 
-            foreach (ChannelDto dto in dtosList)
+            foreach (ChannelDto channelDto in channelDtosList)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 
                 ReplicateResult replicateResult;
 
-                if (string.IsNullOrWhiteSpace(dto.Name))
+                if (string.IsNullOrWhiteSpace(channelDto.Name))
                 {
-                    Log.Error("channel without name. ChannelPageUrl: [{ChannelPageUrl}]", dto.Url);
+                    Log.Error("channel without name. ChannelPageUrl: [{ChannelPageUrl}]", channelDto.Url);
                     continue;
                 }
 
-                if (channelsByName.TryGetValue(dto.Name, out Channel channelDb))
+                if (channelsDbByName.TryGetValue(channelDto.Name, out Channel channelDb))
                 {
-                    replicateResult = Replicate(dto, channelDb);
-                    channelsByName.Remove(channelDb.Name);
+                    replicateResult = Replicate(channelDto, channelDb);
+                    channelsDbByName.Remove(channelDb.Name);
                 }
                 else
                 {
-                    replicateResult = Replicate(dto);
+                    replicateResult = Replicate(channelDto);
                 }
 
                 result.Add(replicateResult);
             }
 
-            foreach (Channel channelDb in channelsByName.Values)
+            foreach (Channel channelDb in channelsDbByName.Values)
             {
                 ReplicateResult channelDeleted = ReplicateResult.BuildChannelDeleted(channelDb.Name);
                 result.Add(channelDeleted);
             }
             
-            _db.Channels.RemoveRange(channelsByName.Values);
+            _db.Channels.RemoveRange(channelsDbByName.Values);
 
             await _db.SaveChangesAsync(cancellationToken);
 
@@ -72,7 +72,7 @@ namespace VH.PluralsightScraper.Data
 
         private ReplicateResult Replicate(ChannelDto channelDto, Channel channelDb)
         {
-            bool channelModified = channelDb.Merge(channelDto);
+            bool channelModified = channelDb.Merge(channelDto, _entityFactory);
 
             if (channelModified)
             {
@@ -86,7 +86,7 @@ namespace VH.PluralsightScraper.Data
 
         private ReplicateResult Replicate(ChannelDto channelDto)
         {
-            var newChannel = new Channel(channelDto);
+            var newChannel = new Channel(channelDto, _entityFactory);
 
             LookUpCourses(ref newChannel);
 
@@ -124,5 +124,6 @@ namespace VH.PluralsightScraper.Data
         }
         
         private readonly PluralsightContext _db;
+        private readonly EntityFactory _entityFactory;
     }
 }

@@ -14,10 +14,12 @@ namespace VH.PluralsightScraper.Data.EFConfigs
                    .IsRequired()
                    .HasMaxLength(100);
 
-            builder.HasIndex(c => new { c.Name })
+            builder.HasIndex(c => new { c.Name, c.DatePublished })
                    .IsUnique();
         }
 
         #endregion
     }
 }
+
+// santi: add summaries to serilog
