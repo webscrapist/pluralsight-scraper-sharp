@@ -106,9 +106,7 @@ namespace VH.PluralsightScraper.Data
                     continue;
                 }
 
-                Course courseDb = _db.Courses.SingleOrDefault(c => string.Equals(c.Name,
-                                                                                 channelCourse.Course.Name,
-                                                                                 StringComparison.CurrentCultureIgnoreCase));
+                Course courseDb = _db.Courses.SingleOrDefault(course => course.ComparisonKey == channelCourse.Course.ComparisonKey);
 
                 bool isNewCourse = courseDb == null;
 
