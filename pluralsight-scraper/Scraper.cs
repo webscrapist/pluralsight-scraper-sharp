@@ -20,7 +20,6 @@ namespace VH.PluralsightScraper
             _password = password ?? throw new ArgumentNullException(nameof(password));
         }
 
-        // santi: cancellation token not used
         public async Task<IEnumerable<ChannelDto>> GetChannels(CancellationToken cancellationToken)
         {
             var channelsList = new List<ChannelDto>();
@@ -33,7 +32,7 @@ namespace VH.PluralsightScraper
                 IEnumerable<string> channelUrls =  await GetChannelUrls(page);
 
                 // santi: [next] consider doing this in parallel
-                foreach (string url in channelUrls)
+                foreach (string url in channelUrls.TakeWhile(url => !cancellationToken.IsCancellationRequested))
                 {
                     ChannelDto channel = await GetChannelDetails(page, url);
                     channelsList.Add(channel);
