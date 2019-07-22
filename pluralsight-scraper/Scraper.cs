@@ -69,45 +69,43 @@ namespace VH.PluralsightScraper
             //await page.WaitForSelectorAsync(COURSES_SELECTOR);
 
             // santi: [next] consider moving this to a js file
-            const string JS_FUNCTION_TO_GET_COURSES_DETAILS = @"() => {
+            string jsFunctionToGetCoursesDetails = $@"() => {{
   const selectors = Array.from(document.querySelectorAll('div.css-kxulf3 a'));
 
-  return selectors.map(s => {
+  return selectors.map(s => {{
     const courseName = s.innerText;
 
     const subSelectors = Array.from(s.parentNode.parentNode.parentNode.parentNode.querySelectorAll('span.css-1kcrbi9'));
 
     const isPluralsightPath = subSelectors.length == 2;
 
-    if (isPluralsightPath) {
-      return { 
+    if (isPluralsightPath) {{
+      return {{ 
         name: courseName, 
-        level: 'pluralsight-path',
+        level: '{PLURALSIGHT_PATH_LEVEL}',
         datePublished: ''
-      }
-    }
+      }}
+    }}
 
     const isPluralsightCourse = subSelectors.length == 5;
 
-    if (isPluralsightCourse) {
-      return { 
+    if (isPluralsightCourse) {{
+      return {{ 
         name: courseName, 
         level: subSelectors[2].innerText,
         datePublished: subSelectors[3].innerText
-      }
-    }
+      }}
+    }}
 
-    return { 
+    return {{ 
       name: courseName, 
       level: 'unknown',
       datePublished: ''
-    }
-  });
-}";
+    }}
+  }});
+}}";
 
-            // santi: [next] errors in log
-
-            CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(JS_FUNCTION_TO_GET_COURSES_DETAILS);
+            CourseDto[] courses = await page.EvaluateFunctionAsync<CourseDto[]>(jsFunctionToGetCoursesDetails);
             
             LogMissingData(courses, channelPageUrl: page.Url);
 
@@ -136,7 +134,7 @@ namespace VH.PluralsightScraper
         private static IEnumerable<CoursesMissingData> GetMissingDetails(IReadOnlyCollection<CourseDto> courses)
         {
             Expression<Func<CourseDto, bool>> missingNameExpression          = course => string.IsNullOrWhiteSpace(course.Name);
-            Expression<Func<CourseDto, bool>> missingDatePublishedExpression = course => string.IsNullOrWhiteSpace(course.DatePublished);
+            Expression<Func<CourseDto, bool>> missingDatePublishedExpression = course => string.IsNullOrWhiteSpace(course.DatePublished) && course.Level != PLURALSIGHT_PATH_LEVEL;
             Expression<Func<CourseDto, bool>> missingLevelExpression         = course => string.IsNullOrWhiteSpace(course.Level);
 
             var courseFieldsList =
@@ -207,6 +205,8 @@ namespace VH.PluralsightScraper
 
             return await page.EvaluateExpressionAsync<string[]>(jsSelectAllAnchors);
         }
+
+        private const string PLURALSIGHT_PATH_LEVEL = "pluralsight-path";
 
         private readonly BrowserFactory _browserFactory;
         private readonly string _username;
