@@ -21,5 +21,3 @@ namespace VH.PluralsightScraper.Data.EFConfigs
         #endregion
     }
 }
-
-// santi: [next] add summaries to serilog
