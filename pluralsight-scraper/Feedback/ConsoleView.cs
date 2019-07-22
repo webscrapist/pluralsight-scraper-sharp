@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using Serilog;
 using VH.PluralsightScraper.Domain;
 using VH.PluralsightScraper.Dtos;
 
@@ -33,37 +35,42 @@ namespace VH.PluralsightScraper.Feedback
 
         public static void Show(ReplicateResult result)
         {
-            var columnsConfig = new[]
-                                {
-                                    new TableColumn(TableRenderer.COLUMN_NAME_INDEX       , length:  5, alignment: "right", getValue: (detail, i) => i.ToString()),
-                                    new TableColumn(TableRenderer.COLUMN_NAME_CHANNEL_NAME, length: 30, alignment: "left" , getValue: (detail, i) => detail.ChannelName),
-                                    new TableColumn(TableRenderer.COLUMN_NAME_ACTION      , length: 10, alignment: "left" , getValue: (detail, i) => detail.Action.ToString()),
-                                };
+            var columnsConfig = 
+                new[]
+                {
+                    new TableColumn(TableRenderer.COLUMN_NAME_INDEX       , length:  5, alignment: "right", getValue: (detail, i) => i.ToString()),
+                    new TableColumn(TableRenderer.COLUMN_NAME_CHANNEL_NAME, length: 30, alignment: "left" , getValue: (detail, i) => detail.ChannelName),
+                    new TableColumn(TableRenderer.COLUMN_NAME_ACTION      , length: 10, alignment: "left" , getValue: (detail, i) => detail.Action.ToString()),
+                };
 
             var tableRenderer = new TableRenderer(columnsConfig);
 
-            Console.WriteLine();
-            Console.WriteLine(tableRenderer.Headers);
+            var sb = new StringBuilder();
+
+            sb.AppendLine();
+            sb.AppendLine(tableRenderer.Headers);
 
             var rowIndex = 1;
 
             foreach (ReplicateResultDetail detail in result.Details)
             {
-                Console.WriteLine(tableRenderer.DataRow(detail, rowIndex));
+                sb.AppendLine(tableRenderer.DataRow(detail, rowIndex));
                 rowIndex += 1;
             }
 
-            Console.WriteLine();
-            Console.WriteLine($" channels created   : [{result.ChannelsCreatedCount}]");
-            Console.WriteLine($" channels updated   : [{result.ChannelsUpdatedCount}]");
-            Console.WriteLine($" channels deleted   : [{result.ChannelsDeletedCount}]");
-            Console.WriteLine($" channels unchanged : [{result.ChannelsUnchangedCount}]");
+            sb.AppendLine();
+            sb.AppendLine($" channels created   : [{result.ChannelsCreatedCount}]");
+            sb.AppendLine($" channels updated   : [{result.ChannelsUpdatedCount}]");
+            sb.AppendLine($" channels deleted   : [{result.ChannelsDeletedCount}]");
+            sb.AppendLine($" channels unchanged : [{result.ChannelsUnchangedCount}]");
 
-            Console.WriteLine( "-------------------   ------");
-            Console.WriteLine($"     total channels : [{result.TotalChannelsCount}]");
+            sb.AppendLine( "-------------------   ------");
+            sb.AppendLine($"     total channels : [{result.TotalChannelsCount}]");
 
-            Console.WriteLine();
-            Console.WriteLine($"            elapsed : [{_stopWatch?.Elapsed}]");
+            sb.AppendLine();
+            sb.AppendLine($"            elapsed : [{_stopWatch?.Elapsed}]");
+
+            Log.Information(sb.ToString());
         }
 
         public static void ShowCancelRequested()
