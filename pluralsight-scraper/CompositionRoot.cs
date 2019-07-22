@@ -23,8 +23,7 @@ namespace VH.PluralsightScraper
             ILoggerFactory serilogFactory = new LoggerFactory().AddSerilog();
 
             DbContextOptions<PluralsightContext> options = 
-                new DbContextOptionsBuilder<PluralsightContext>().EnableSensitiveDataLogging()
-                                                                 .UseNpgsql(postgreSqlConnString)
+                new DbContextOptionsBuilder<PluralsightContext>().UseNpgsql(postgreSqlConnString)
                                                                  .UseLoggerFactory(serilogFactory)
                                                                  .Options;
 
