@@ -8,4 +8,4 @@ select C."Name" ChannelName
 from "Channels" C
 join "ChannelCourse" CC on C."Id" = CC."ChannelId"
 join "Courses" C2 on CC."CourseId" = C2."Id"
-where C."Name" = 'PowerShell';
+where lower(C."Name") = 'python';
