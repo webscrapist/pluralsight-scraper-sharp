@@ -3,7 +3,7 @@
 
     return selectors.map(s => {
         const courseName = s.innerText;
-        const subSelectors = Array.from(s.parentNode.parentNode.parentNode.parentNode.querySelectorAll("span.css-1kcrbi9"));
+        const subSelectors = Array.from(s.parentNode.parentNode.parentNode.parentNode.parentNode.querySelectorAll("span.css-1kcrbi9"));
         const isPluralsightPath = subSelectors.length === 2;
 
         if (isPluralsightPath) {
