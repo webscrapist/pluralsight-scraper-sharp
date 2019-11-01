@@ -26,8 +26,8 @@ namespace VH.PluralsightScraper
             var channelsList = new List<ChannelDto>();
 
             using (Browser browser = await _browserFactory.Create())
-            using (Page page = await browser.NewPageAsync())
             {
+                using Page page = await browser.NewPageAsync();
                 await Login(page);
                 
                 IEnumerable<string> channelUrls = await GetChannelUrls(page);
